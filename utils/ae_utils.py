@@ -78,11 +78,11 @@ def run_ae(data: DataSet,
            max_iter: int = 1000000):
     counter = count(1)
     for it in range(max_iter):
-        if it % 2000 == 0:
+        if it % 10000 == 0:
             iter_id = str(next(counter)).zfill(3)
             plot_rec_sample(data.sample, data.dim_X, X, G_X, sess, experiment_id, iter_id)
 
-            if it % 6000 == 0 and feature_eval is not None:
+            if it % 10000 == 0 and feature_eval is not None:
                 fe_loss, fe_acc = feature_eval(sess)
                 print(f"Feature Evaluation at {iter_id}: loss -> {fe_loss}, Accuracy -> {fe_acc}")
 

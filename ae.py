@@ -3,11 +3,11 @@ from MLkit import tf_networks as nets
 from MLkit.tf_math import accuracy
 
 from utils.ae_utils import run_ae
-from utils.data_utils import mnist
+from utils.data_utils import mnist, mnist_test
 from utils.feature_eval import feature_eval_setup
 
 data_name = 'mnist'
-data = mnist
+data, data_test = mnist, mnist_test
 name = 'AE'
 dim_z = 8
 mb_size = 128
@@ -34,7 +34,10 @@ train = tf.train.RMSPropOptimizer(learning_rate=1e-4).minimize(loss)
 print([_.name for _ in tf.get_collection(tf.GraphKeys.VARIABLES)])
 
 sess = tf.Session()
-feature_eval = feature_eval_setup(sess, X, Z, data.sample(5000), accuracy, nets.scewl)
+feature_eval = feature_eval_setup(sess, X, Z,
+                                  data.sample(1000),
+                                  data_test.sample(1000),
+                                  accuracy, nets.scewl)
 sess.run(tf.global_variables_initializer())
 run_ae(data=data,
        mb_size=mb_size,
