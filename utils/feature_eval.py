@@ -1,10 +1,10 @@
 from typing import Callable, Optional, Tuple, Union
 
-from tqdm import tqdm
 import tensorflow as tf
 from MLkit.dataset import DataSet
 from MLkit.tf_networks import dense_net
-from tensorflow import Tensor, Operation, Session
+from tensorflow import Tensor, Session
+from tqdm import tqdm
 
 Number = Union[int, float]
 
@@ -17,8 +17,8 @@ def feature_eval_setup(sess: Session,
                        eval_fn: Callable[[Tensor, Tensor], Tensor],
                        eval_loss_fn: Callable[[Tensor, Tensor], Tensor],
                        supervise_net: Optional[Callable[[Tensor], Tensor]] = None,
-                       minimize: Callable[[Tensor], Operation] = (
-                               tf.train.RMSPropOptimizer(learning_rate=1e-4).minimize),
+                       optimizer: tf.train.Optimizer = (
+                               tf.train.RMSPropOptimizer(learning_rate=1e-4)),
                        mb_size: Optional[int] = 128,
                        max_iter: int = 5000,
                        restart_training: bool = True
@@ -33,7 +33,9 @@ def feature_eval_setup(sess: Session,
     y = tf.placeholder(tf.float32, [None, data_train.dim_y])
     eval_loss = tf.reduce_mean(eval_loss_fn(y_logits, y))
     eval_result = eval_fn(y_hat, y)
-    train = minimize(eval_loss)
+    vars_fteval = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+                                    scope='feature_eval')
+    train = optimizer.minimize(eval_loss, var_list=vars_fteval)
     eval_vars_initializer = tf.variables_initializer(
         tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='feature_eval'))
     sess.run(eval_vars_initializer)
