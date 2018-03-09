@@ -10,6 +10,7 @@ from tensorflow import Tensor, Session, Operation
 
 from utils.feature_eval import Number
 from utils.setup import out_dir
+import time
 
 
 def get_out_dir(save_id: str):
@@ -43,8 +44,8 @@ def plot_grid(dim_X, samples, _rows, outer_ax, fig):
                                           subplot_spec=outer_ax,
                                           wspace=0.05, hspace=0.05)
     for i, sample in enumerate(samples):
-        if dim_X[2] == 1:  # Monotone image
-            sample = np.reshape(sample, dim_X[:-1])
+        if len(dim_X) == 2:  # Monotone image
+            sample = np.reshape(sample, dim_X)
         else:
             sample = np.reshape(sample, dim_X)
         ax = plt.Subplot(fig, gs[i])
@@ -75,21 +76,43 @@ def run_ae(data: DataSet,
            data_feeder: Callable[
                [DataSet, Tensor, int],
                Dict[Tensor, np.ndarray]] = default_feeder,
-           max_iter: int = 1000000):
-    counter = count(1)
+           max_iter: int = 100000):
+    time_0 = time.time()
+
+    def sample_cond(iter):
+        nonlocal time_0
+        if time.time() - time_0 > 60 * 2:
+            time_0 = time.time()
+            return True
+        elif iter == 0:
+            return True
+        else:
+            return False
+
+    def feature_eval_cond(i):
+        if feature_eval is not None:
+            return True
+        else:
+            return False
+
+    def print_cond(i):
+        return i % 500 == 0
+
+    # counter = count(1)
     for it in range(max_iter):
-        if it % 10000 == 0:
-            iter_id = str(next(counter)).zfill(3)
+        if sample_cond(it):
+            # iter_id = str(next(counter)).zfill(3)
+            iter_id = str(it).zfill(int(np.log10(max_iter) + 1))
             plot_rec_sample(data.sample, data.dim_X, X, G_X, sess, experiment_id, iter_id)
 
-            if it % 10000 == 0 and feature_eval is not None:
+            if feature_eval_cond(it):
                 fe_loss, fe_acc = feature_eval(sess)
                 print(f"Feature Evaluation at {iter_id}: loss -> {fe_loss}, Accuracy -> {fe_acc}")
 
         data_feed = data_feeder(data, X, mb_size)
         sess.run(train, feed_dict=data_feed)
 
-        if it % 500 == 0:
+        if print_cond(it):
             data_feed = data_feeder(data, X, mb_size)
             loss_val = sess.run(loss, feed_dict=data_feed)
             print('Iter: {}'.format(it))

@@ -30,7 +30,7 @@ def feature_eval_setup(sess: Session,
             y_logits = dense_net(Z, [256, data_train.dim_y])
 
     y_hat = tf.sigmoid(y_logits)
-    y = tf.placeholder(tf.float32, [None, data_train.dim_y])
+    y = tf.placeholder(tf.float32, [None] + data_train.dim_Y)
     eval_loss = tf.reduce_mean(eval_loss_fn(y_logits, y))
     eval_result = eval_fn(y_hat, y)
     vars_fteval = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
