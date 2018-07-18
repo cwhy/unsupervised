@@ -1,10 +1,10 @@
 from enum import Enum, auto
 
-from MLkit.dataset import DataSet
 from tensorflow.examples.tutorials.mnist import input_data
 import os.path as op
 from strange_sets.count import CountSquares
 import numpy as np
+from MLkit.dataset import DataSet, CategoricalDataSet, Encoding
 
 
 class DataName(Enum):
@@ -14,6 +14,7 @@ class DataName(Enum):
 
 
 def import_data(data_name: DataName):
+    data_dir = op.join(op.expanduser('~'), 'Data')
     if data_name == DataName.MNIST:
         mnist_dir = op.join(op.expanduser('~'), 'Data', 'tf_MNIST')
         mnist_raw = input_data.read_data_sets(mnist_dir, one_hot=True)
@@ -21,6 +22,11 @@ def import_data(data_name: DataName):
         mnist_test = DataSet(mnist_raw.test.images, mnist_raw.test.labels, dim_X=[28, 28])
         return mnist, mnist_test
     elif data_name == DataName.STRANGE:
+        x = np.load(op.join(data_dir, 'strange', 'count', 'x0.npy'))
+        y = np.load(op.join(data_dir, 'strange', 'count', 'y0.npy'))
+        strange_cs = CategoricalDataSet(x, y, dim_X=[28, 28], y_in_encoding=Encoding.T_1HOT)
+        return strange_cs.random_split(0.99, ("tr", "tst"))
+    elif data_name == DataName.STRANGE_RT:
         strange_cs = CountSquares(flatten_x=True)
         return strange_cs, strange_cs
     elif data_name == DataName.PDSST:

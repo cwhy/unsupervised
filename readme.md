@@ -1,5 +1,6 @@
 Unsupervised
 ====
 
-A framework for experiments on unsupervised learning, depends on cwhy/MLKit
+A framework for experiments on unsupervised learning,
+depends on tensorflow, tqdm, cwhy/MLKit cwhy/strange_sets
 

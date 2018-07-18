@@ -17,7 +17,7 @@ X = tf.placeholder(tf.float32, shape=[None, data.dim_x])
 X__ = tf.reshape(X, shape=[-1] + data.dim_X + [1], name='X__')
 
 with tf.variable_scope('E'):
-    Z_logits = nets.conv_only28(X__, dim_z, is_train=True)
+    Z_logits = nets.conv_only28(X__, dim_z)
     Z = tf.nn.relu(Z_logits)
 
 with tf.variable_scope('G'):

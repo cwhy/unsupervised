@@ -17,7 +17,7 @@ X = tf.placeholder(tf.float32, shape=[None, data.dim_x])
 X__ = tf.reshape(X, shape=[-1] + data.dim_X + [1], name='X__')
 
 with tf.variable_scope('E'):
-    tmp_logits = nets.conv_only28(X__, 1024, is_train=True)
+    tmp_logits = nets.conv_only28(X__, 1024)
     Z, kl_loss = nets.get_variational_layer(tmp_logits, dim_z)
 
 with tf.variable_scope('G'):
@@ -33,7 +33,6 @@ print([_.name for _ in tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)])
 
 sess = tf.Session()
 interpolation = interpolation_setup(
-    sess,
     X,
     G_X,
     data.dim_X,
@@ -44,6 +43,8 @@ run_ae(data=data,
        mb_size=mb_size,
        interpolation=interpolation,
        feature_eval=None,
+       view_dist=None,
+       view_disentangle=None,
        train=train,
        loss=loss,
        X=X,

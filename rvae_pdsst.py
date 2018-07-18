@@ -43,7 +43,7 @@ for t in range(T):
     recon_loss += recon_loss_t
 
 G_X = X_means[0]
-loss = recon_loss + 0.001 * kl_loss/T
+loss = recon_loss + kl_loss/T
 
 train = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(loss)
 print([_.name for _ in tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)])
